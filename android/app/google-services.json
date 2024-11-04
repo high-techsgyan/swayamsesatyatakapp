@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "75934530121",
+    "project_id": "swayamsesatyatak",
+    "storage_bucket": "swayamsesatyatak.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75934530121:android:810d57473e539df8835d98",
+        "android_client_info": {
+          "package_name": "com.swayamsesatyatak.achintya"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0QutV7mYdMMvUAQ_jDOaKDOFMJbx5auo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

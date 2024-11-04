@@ -1,0 +1,41 @@
+plugins {
+    id "com.android.application"
+    id "com.google.gms.google-services" // Firebase services plugin
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin" // Flutter plugin
+}
+
+android {
+    namespace = "com.swayamsesatyatak.achintya" // Ensure this matches your app package name
+    compileSdk = 34 // or use flutter.compileSdkVersion if supported
+
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8" // Use the string format
+    }
+
+    defaultConfig {
+        applicationId = "com.swayamsesatyatak.achintya"
+        minSdk = 23
+        targetSdk = 33 // or flutter.targetSdkVersion if supported
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildTypes {
+        release {
+            // Use signing configuration for release (signingConfigs.debug is temporary)
+            signingConfig = signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}

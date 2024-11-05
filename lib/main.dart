@@ -9,6 +9,7 @@ import 'package:swayamsesatyatak/screen/auth/register_screen.dart';
 import 'package:swayamsesatyatak/screen/home_screen.dart';
 import 'package:swayamsesatyatak/screen/profile_screen.dart';
 import 'package:swayamsesatyatak/screen/splash_screen.dart';
+import 'package:swayamsesatyatak/screen/update_page.dart';
 import 'package:swayamsesatyatak/screen/walkthrough/walk_through.dart';
 import 'package:swayamsesatyatak/services/donation_screen.dart';
 import 'package:swayamsesatyatak/views/bookviews/bookdetailsview.dart';
@@ -55,8 +56,10 @@ class MyApp extends StatelessWidget {
           path: '/book',
           builder: (context, state) => const BookScreen(),
         ),
-        GoRoute(path: '/bookpage',
-        builder: (context, state)=> BookScreenPage(),),
+        GoRoute(
+          path: '/bookpage',
+          builder: (context, state) => BookScreenPage(),
+        ),
         GoRoute(
           path: '/walkthrough',
           builder: (context, state) => WalkThrough(),
@@ -93,8 +96,18 @@ class MyApp extends StatelessWidget {
           path: '/userdonation',
           builder: (context, state) => UserDonationScreen(),
         ),
-        GoRoute(path: '/donation',
-        builder: (context, state)=> DonationPage(),)
+        GoRoute(
+          path: '/donation',
+          builder: (context, state) => DonationPage(),
+        ),
+        GoRoute(
+  path: '/updatePage',
+  builder: (context, state) {
+    final apkUrl = state.extra as String; // Get the URL passed from the SplashScreen
+    return UpdatePage(apkUrl: apkUrl);
+  },
+),
+
       ],
     );
 

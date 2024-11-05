@@ -4,34 +4,42 @@ import 'dart:convert';
 
 import 'package:swayamsesatyatak/services/videoplayer_services.dart';
 
-class PlaylistScreen extends StatefulWidget {
+class PlaylistVideoScreen extends StatefulWidget {
   final String playlistId;
 
-  PlaylistScreen({required this.playlistId});
+  PlaylistVideoScreen({required this.playlistId});
 
   @override
-  _PlaylistScreenState createState() => _PlaylistScreenState();
+  _PlaylistVideoScreenState createState() => _PlaylistVideoScreenState();
 }
 
-class _PlaylistScreenState extends State<PlaylistScreen> {
-  List<dynamic> playlistVideos = [];
+class _PlaylistVideoScreenState extends State<PlaylistVideoScreen> {
+  List<Map<String, dynamic>> _videos = [];
+
+  final String apiKey = 'AIzaSyCxoxeD0frAURWa_yXA-sN1bnKESvWKjGQ';
 
   @override
   void initState() {
     super.initState();
-    fetchPlaylistVideos();
+    _fetchPlaylistVideos();
   }
 
-  Future<void> fetchPlaylistVideos() async {
-    final String apiKey = 'YOUR_YOUTUBE_API_KEY';
-    final url = Uri.parse(
-        'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${widget.playlistId}&key=$apiKey');
+  Future<void> _fetchPlaylistVideos() async {
+    final url =
+        'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${widget.playlistId}&maxResults=20&key=$apiKey';
+    final response = await http.get(Uri.parse(url));
 
-    final response = await http.get(url);
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+      final videoList = data['items'] as List;
       setState(() {
-        playlistVideos = data['items'];
+        _videos = videoList
+            .map((video) => {
+                  'title': video['snippet']['title'],
+                  'thumbnail': video['snippet']['thumbnails']['default']['url'],
+                  'videoId': video['snippet']['resourceId']['videoId'],
+                })
+            .toList();
       });
     }
   }
@@ -39,29 +47,29 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Playlist")),
-      body: ListView.builder(
-        itemCount: playlistVideos.length,
-        itemBuilder: (context, index) {
-          final item = playlistVideos[index];
-          return ListTile(
-            leading:
-                Image.network(item['snippet']['thumbnails']['default']['url']),
-            title: Text(item['snippet']['title']),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => VideoPlayerService(
-                    videoId: item['snippet']['resourceId']['videoId'],
-                    videoUrl: '',
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
+      appBar: AppBar(title: Text("Playlist Videos")),
+      body: _videos.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: _videos.length,
+              itemBuilder: (context, index) {
+                final video = _videos[index];
+                return ListTile(
+                  leading: Image.network(video['thumbnail']),
+                  title: Text(video['title']),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => VideoPlayerScreen(
+                            videoUrl:
+                                'https://www.youtube.com/watch?v=${video['videoId']}'),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
     );
   }
 }

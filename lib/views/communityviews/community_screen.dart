@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:swayamsesatyatak/models/qoute_model.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({Key? key}) : super(key: key);
@@ -62,28 +66,26 @@ class _CommunityScreenState extends State<CommunityScreen>
     return quotes;
   }
 
-  // Submit a new quote
   Future<void> _submitQuote() async {
     if (_newQuote.isNotEmpty) {
       final newQuoteRef = _quotesRef.push();
       await newQuoteRef.set({
         'text': _newQuote,
-        'author': FirebaseAuth.instance.currentUser!.email,
-        'likes': {}, // Initialize an empty map for likes
-        'comments': {}, // Initialize an empty map for comments
-        'likesCount': 0, // Initialize the like count
-        'commentsCount': 0, // Initialize the comment count
+        'author': FirebaseAuth.instance.currentUser!.uid,
+        'likes': {},
+        'comments': {},
+        'likesCount': 0,
+        'commentsCount': 0,
       });
       _showSuccessDialog('Quote added successfully!');
       setState(() {
-        _newQuote = ''; // Clear the input field
+        _newQuote = '';
       });
     } else {
       _showErrorDialog('Please enter a quote.');
     }
   }
 
-  // Toggle Like/Unlike a quote
   Future<void> _toggleLikeQuote(Quote quote) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -94,23 +96,21 @@ class _CommunityScreenState extends State<CommunityScreen>
 
       final DatabaseEvent event = await quoteLikeRef.once();
       if (event.snapshot.exists) {
-        // User has already liked, so unlike
         await quoteLikeRef.remove();
         await userLikesRef.remove();
         final newLikesCount = quote.likesCount - 1;
         await _quotesRef.child(quote.id).update({'likesCount': newLikesCount});
         setState(() {
-          quote.likesCount = newLikesCount; // Update the local count
+          quote.likesCount = newLikesCount;
         });
         _showSuccessDialog('You unliked this post!');
       } else {
-        // User has not liked, so like
         await quoteLikeRef.set(true);
         await userLikesRef.set(true);
         final newLikesCount = quote.likesCount + 1;
         await _quotesRef.child(quote.id).update({'likesCount': newLikesCount});
         setState(() {
-          quote.likesCount = newLikesCount; // Update the local count
+          quote.likesCount = newLikesCount;
         });
         _showSuccessDialog('You liked this post!');
       }
@@ -119,7 +119,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     }
   }
 
-  // Comment on a quote
   Future<void> _commentOnQuote(
       String quoteId, String commentText, int currentCommentsCount) async {
     if (commentText.isEmpty) {
@@ -140,15 +139,13 @@ class _CommunityScreenState extends State<CommunityScreen>
         'timestamp': DateTime.now().toIso8601String(),
       };
 
-      await commentRef.set(commentData); // Add the comment under the post
-      await userCommentsRef
-          .set(commentData); // Add the comment under the user profile
+      await commentRef.set(commentData);
+      await userCommentsRef.set(commentData);
       final newCommentsCount = currentCommentsCount + 1;
       await _quotesRef
           .child(quoteId)
           .update({'commentsCount': newCommentsCount});
       setState(() {
-        // Increment the count in the UI
         currentCommentsCount = newCommentsCount;
       });
       _showSuccessDialog('Comment added successfully!');
@@ -157,7 +154,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     }
   }
 
-  // Get comments for a quote
   Future<List<Comment>> _fetchComments(String quoteId) async {
     final DatabaseReference commentsRef =
         _quotesRef.child(quoteId).child('comments');
@@ -174,7 +170,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     return comments;
   }
 
-  // Error and success dialog handlers
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -207,16 +202,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     );
   }
 
-  String _extractVideoId(String url) {
-    final RegExp regExp = RegExp(
-      r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})',
-      caseSensitive: false,
-      multiLine: false,
-    );
-    final match = regExp.firstMatch(url);
-    return match != null && match.groupCount > 0 ? match.group(1)! : '';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -224,45 +209,42 @@ class _CommunityScreenState extends State<CommunityScreen>
     );
   }
 
-  // Build Daily Quotes Tab
   Widget _buildDailyQuotesTab() {
     return Column(
       children: [
-        _buildAdminInputField(), // Show input field for admins
-        Expanded(child: _buildQuoteList()), // Show quotes list
+        _buildAdminInputField(),
+        Expanded(child: _buildQuoteList()),
       ],
     );
   }
 
-  // Admin Input Field
   Widget _buildAdminInputField() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        color: Colors.grey[200],
+      ),
       child: Row(
         children: [
+          Icon(Icons.edit, color: Colors.grey),
+          SizedBox(width: 10),
           Expanded(
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  _newQuote = value;
-                });
+            child: GestureDetector(
+              onTap: () {
+                context.push('/quote');
               },
-              decoration: const InputDecoration(
-                hintText: 'Enter a daily quote...',
-                border: OutlineInputBorder(),
+              child: Text(
+                "what's in Your Mind",
+                style: TextStyle(color: Colors.grey[600]),
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: _submitQuote,
           ),
         ],
       ),
     );
   }
 
-  // Display List of Quotes
   Widget _buildQuoteList() {
     return FutureBuilder<List<Quote>>(
       future: _fetchQuotes(),
@@ -277,6 +259,7 @@ class _CommunityScreenState extends State<CommunityScreen>
             itemCount: quotes.length,
             itemBuilder: (context, index) {
               return QuoteCard(
+                imageUrl: quotes[index].image,
                 quote: quotes[index],
                 onLike: () => _toggleLikeQuote(quotes[index]),
                 onComment: (commentText) => _commentOnQuote(
@@ -350,99 +333,8 @@ class _CommunityScreenState extends State<CommunityScreen>
       },
     );
   }
-
-  Widget _buildTextField(TextEditingController controller, String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label),
-        TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'YouTube Video URL'),
-        ),
-        const SizedBox(height: 10),
-      ],
-    );
-  }
-
-  bool _isValidYouTubeUrl(String url) {
-    final RegExp regex = RegExp(
-      r'^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$',
-      caseSensitive: false,
-      multiLine: false,
-    );
-    return regex.hasMatch(url);
-  }
-
-  void _showdErrorDialog(List<String> errorMessages) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: errorMessages.map((msg) => Text(msg)).toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showdSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Success'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
-// Quote Model
-class Quote {
-  final String id;
-  final String text;
-  final String author;
-  int likesCount;
-  int commentsCount;
-
-  Quote({
-    required this.id,
-    required this.text,
-    required this.author,
-    required this.likesCount,
-    required this.commentsCount,
-  });
-
-  factory Quote.fromMap(Map<dynamic, dynamic> data, String id) {
-    return Quote(
-      id: id,
-      text: data['text'] ?? '',
-      author: data['author'] ?? 'Unknown',
-      likesCount: data['likesCount'] ?? 0,
-      commentsCount: data['commentsCount'] ?? 0,
-    );
-  }
-}
-
-// Comment Model
 class Comment {
   final String id;
   final String text;
@@ -459,15 +351,16 @@ class Comment {
   }
 }
 
-// QuoteCard Widget
 class QuoteCard extends StatelessWidget {
+  final String imageUrl;
   final Quote quote;
   final VoidCallback onLike;
-  final ValueChanged<String> onComment;
+  final Function(String) onComment;
   final VoidCallback onShowComments;
 
   const QuoteCard({
     Key? key,
+    required this.imageUrl,
     required this.quote,
     required this.onLike,
     required this.onComment,
@@ -477,44 +370,75 @@ class QuoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              quote.text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text('- ${quote.author}'),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text(quote.author),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.thumb_up),
-                      onPressed: onLike,
-                    ),
-                    Text('${quote.likesCount}'), // Show likes count
-                  ],
+                Linkify(
+                  onOpen: (link) async {
+                    final url = Uri.parse(link.url);
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url);
+                    }
+                  },
+                  text: quote.text,
+                  style: TextStyle(fontSize: 16.0),
+                  linkStyle: TextStyle(color: Colors.blue),
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.comment),
-                      onPressed: onShowComments, // Show comments dialog
-                    ),
-                    Text('${quote.commentsCount}'), // Show comments count
-                  ],
-                ),
+                const SizedBox(height: 8),
+                if (imageUrl.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => FullScreenImage(url: imageUrl),
+                        ),
+                      );
+                    },
+                    child: Image.network(imageUrl),
+                  ),
               ],
             ),
-          ],
-        ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: Icon(Icons.thumb_up_alt_outlined),
+                onPressed: onLike,
+              ),
+              Text('${quote.likesCount}'),
+              IconButton(
+                icon: Icon(Icons.comment),
+                onPressed: onShowComments,
+              ),
+              Text('${quote.commentsCount}'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FullScreenImage extends StatelessWidget {
+  final String url;
+
+  const FullScreenImage({Key? key, required this.url}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Image.network(url),
       ),
     );
   }

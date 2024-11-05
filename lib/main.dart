@@ -10,18 +10,21 @@ import 'package:swayamsesatyatak/screen/home_screen.dart';
 import 'package:swayamsesatyatak/screen/profile_screen.dart';
 import 'package:swayamsesatyatak/screen/splash_screen.dart';
 import 'package:swayamsesatyatak/screen/walkthrough/walk_through.dart';
+import 'package:swayamsesatyatak/services/donation_screen.dart';
 import 'package:swayamsesatyatak/views/bookviews/bookdetailsview.dart';
+import 'package:swayamsesatyatak/views/communityviews/post_quote_screen.dart';
 import 'package:swayamsesatyatak/views/dashboard_screen.dart';
+import 'package:swayamsesatyatak/views/postviews/bookspage_screen.dart';
 import 'package:swayamsesatyatak/views/postviews/postdetailsscreen.dart';
+import 'package:swayamsesatyatak/views/postviews/userdonationscreen.dart';
+import 'package:swayamsesatyatak/views/videoscreen/UserBooksScreen.dart';
 
 void main() async {
-  WidgetsFlutterBinding
-      .ensureInitialized(); // Ensure Flutter binding is initialized
-  await Firebase.initializeApp(); // Initialize Firebase
+  WidgetsFlutterBinding.ensureInitialized();
 
-  // No need to initialize InAppWebViewPlatform here; it's handled internally.
+  await Firebase.initializeApp();
 
-  runApp(const MyApp()); // Updated to run const MyApp
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -52,13 +55,15 @@ class MyApp extends StatelessWidget {
           path: '/book',
           builder: (context, state) => const BookScreen(),
         ),
+        GoRoute(path: '/bookpage',
+        builder: (context, state)=> BookScreenPage(),),
         GoRoute(
           path: '/walkthrough',
           builder: (context, state) => WalkThrough(),
         ),
         GoRoute(path: '/profile', builder: (context, state) => ProfileScreen()),
         GoRoute(
-            path: '/dashborad', builder: (context, state) => DashboardScreen()),
+            path: '/dashboard', builder: (context, state) => DashboardScreen()),
         GoRoute(
           path: '/postDetails',
           builder: (context, state) {
@@ -76,6 +81,20 @@ class MyApp extends StatelessWidget {
             );
           },
         ),
+        GoRoute(
+          path: '/quote',
+          builder: (context, state) => PostQuoteScreen(),
+        ),
+        GoRoute(
+          path: '/userbooks',
+          builder: (context, state) => UserBooksScreen(),
+        ),
+        GoRoute(
+          path: '/userdonation',
+          builder: (context, state) => UserDonationScreen(),
+        ),
+        GoRoute(path: '/donation',
+        builder: (context, state)=> DonationPage(),)
       ],
     );
 

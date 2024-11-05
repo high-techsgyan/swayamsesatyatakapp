@@ -8,6 +8,8 @@ import 'package:swayamsesatyatak/views/communityviews/community_screen.dart';
 import 'package:swayamsesatyatak/views/dashboard_screen.dart';
 import 'package:swayamsesatyatak/views/post_views.dart';
 import 'package:swayamsesatyatak/views/videoscreen/video_screen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   User? user;
   String username = '';
   String userProfileImageUrl = '';
@@ -150,7 +153,7 @@ class HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              showSearchDialog();
+              showSearchDialog(); // Define this function or replace with actual logic
             },
           ),
           IconButton(
@@ -167,39 +170,113 @@ class HomeScreenState extends State<HomeScreen> {
         ],
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: Colors.purple),
-              accountName: Text(username),
-              accountEmail: Text(user?.email ?? ''),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: userProfileImageUrl.isNotEmpty
-                    ? NetworkImage(userProfileImageUrl)
-                    : AssetImage('assets/images/bomjva_logo.png')
-                        as ImageProvider,
-              ),
+          child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(color: Colors.purple),
+            accountName: Text(username),
+            accountEmail: Text(user?.email ?? ''),
+            currentAccountPicture: CircleAvatar(
+              backgroundImage: userProfileImageUrl.isNotEmpty
+                  ? NetworkImage(userProfileImageUrl)
+                  : AssetImage('assets/images/bomjva_logo.png')
+                      as ImageProvider,
             ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-                _onItemTapped(0); // Select Home tab
-              },
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: Text('Home'),
+            onTap: () {
+              Navigator.pop(context);
+              _onItemTapped(0); // Select Home tab
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.dashboard),
+            title: Text('Profile'),
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/profile');
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.web),
+            title: Text('Website'),
+            onTap: () {
+              _launchUrl('https://yourwebsite.com');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.info),
+            title: Text('About Us'),
+            onTap: () {
+              _launchUrl('https://yourwebsite.com/about');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.privacy_tip),
+            title: Text('Privacy Policy'),
+            onTap: () {
+              _launchUrl('https://yourwebsite.com/privacy');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.contact_page),
+            title: Text('Contact Us'),
+            onTap: () {
+              _launchUrl('https://yourwebsite.com/contact');
+            },
+          ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InkWell(
+                  onTap: () {
+                    _launchUrl('https://facebook.com/yourprofile');
+                  },
+                  child: Icon(
+                    FontAwesomeIcons.facebook,
+                    color: Colors.blue,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    _launchUrl('https://twitter.com/yourprofile');
+                  },
+                  child: Icon(
+                    FontAwesomeIcons.twitter,
+                    color: Colors.lightBlue,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    _launchUrl('https://instagram.com/yourprofile');
+                  },
+                  child: Icon(
+                    FontAwesomeIcons.instagram,
+                    color: Colors.pink,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    _launchUrl('https://linkedin.com/yourprofile');
+                  },
+                  child: Icon(
+                    FontAwesomeIcons.linkedin,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.dashboard),
-              title: Text('Profile'),
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/profile');
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        ],
+      )),
+
       body: _getBody(), // Show the appropriate screen based on selected index
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.blue, // Set background color
@@ -300,4 +377,35 @@ class HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+
+ 
+void _launchUrl(String url) async {
+  final Uri uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } else {
+    // Print an error message in the console if it fails
+    print('Could not launch $url');
+    // Optionally show a dialog to inform the user
+    _showDialog('Error', 'Could not launch $url');
+  }
+}
+
+void _showDialog(String title, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
 }

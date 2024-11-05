@@ -39,3 +39,14 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+  
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.1' // ExoPlayer for video playback
+    implementation 'com.google.firebase:firebase-analytics' // Firebase Analytics, example Firebase dependency
+
+    // Additional dependencies
+    implementation 'androidx.core:core-ktx:1.8.0' // Core library with Kotlin extensions
+    implementation 'androidx.appcompat:appcompat:1.4.1' // AppCompat library for backward compatibility
+    implementation 'com.google.android.material:material:1.5.0' // Material Components for UI
+}

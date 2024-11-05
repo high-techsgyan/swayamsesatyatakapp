@@ -46,6 +46,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     context.go('/login'); // Navigate to the login screen after logout
   }
 
+  // Navigate to User Donation screen
+  void _navigateToUserDonation() {
+    context.push('/userdonation'); // Adjust the route as per your setup
+  }
+
+  // Navigate to User Books screen
+  void _navigateToUserBooks() {
+    context.push('/userbooks'); // Adjust the route as per your setup
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +82,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             SizedBox(height: 20),
 
-            // List for navigation items
+            // Navigation buttons
+            ElevatedButton(
+              onPressed: _navigateToUserDonation,
+              child: Text('Donation'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50), // Full-width button
+              ),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _navigateToUserBooks,
+              child: Text('Books'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50), // Full-width button
+              ),
+            ),
 
             Divider(),
 

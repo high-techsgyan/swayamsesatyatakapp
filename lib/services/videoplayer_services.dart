@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/services.dart';
 
-class VideoPlayerService extends StatefulWidget {
+class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
 
-  VideoPlayerService({required this.videoUrl, required videoId});
+  VideoPlayerScreen({required this.videoUrl});
 
   @override
   _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
 }
 
-class _VideoPlayerScreenState extends State<VideoPlayerService> {
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late YoutubePlayerController _controller;
   bool _isFullScreen = false;
   bool _isLoading = true; // Loading state
